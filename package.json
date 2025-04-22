@@ -1,11 +1,10 @@
 {
-  "name": "create-nodejs-express-app",
+  "name": "recite-right",
   "version": "1.7.0",
-  "description": "Create a Node.js app for building production-ready RESTful APIs using Express, by running one command",
-  "bin": "bin/createNodejsApp.js",
+  "description": "Recite Right project",
   "main": "src/index.js",
-  "repository": "https://github.com/hagopj13/node-express-boilerplate.git",
-  "author": "Hagop Jamkojian <hagopj13@gmail.com>",
+  "repository": "https://github.com/fardanahmed/recite-right.git",
+  "author": "Fardan Ahmed",
   "license": "MIT",
   "engines": {
     "node": ">=12.0.0"
@@ -29,7 +28,6 @@
   "keywords": [
     "node",
     "node.js",
-    "boilerplate",
     "generator",
     "express",
     "rest",
@@ -69,7 +67,8 @@
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.0",
     "pm2": "^5.1.0",
-    "swagger-jsdoc": "^6.0.8",
+    "recite-right": "file:",
+    "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^4.3.0",
     "validator": "^13.0.0",
     "winston": "^3.3.4",
