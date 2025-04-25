@@ -1,6 +1,6 @@
 // const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
-const { dashboard } = require('../services/surah.service');
+const { dashboard, getSurahById } = require('../services/surah.service');
 
 // const dashboardSurah = catchAsync(async (req, res) => {
 //   const surah = await req.surahService.getSurahById(req.params.surahId);
@@ -15,6 +15,13 @@ const dashboardSurah = catchAsync(async (req, res) => {
   res.send({ response });
 });
 
+const SurahById = catchAsync(async (req, res) => {
+  const { surahId } = req.params;
+  const surah = await getSurahById(surahId);
+  res.send({ surah });
+});
+
 module.exports = {
   dashboardSurah,
+  SurahById,
 };

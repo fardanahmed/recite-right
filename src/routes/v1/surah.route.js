@@ -1,9 +1,10 @@
 const express = require('express');
-const { dashboardSurah } = require('../../controllers/surah.controller');
+const { dashboardSurah, SurahById } = require('../../controllers/surah.controller');
 
 const router = express.Router();
 
 router.get('/dashboard', dashboardSurah);
+router.post('/get-surah/:surahId', SurahById);
 
 module.exports = router;
 
