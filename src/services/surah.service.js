@@ -1,21 +1,28 @@
 const axios = require('axios');
 const httpStatus = require('http-status');
 const ApiError = require('../utils/ApiError');
+const surahs = require('../components/surahs'); // Import the surah.json file
 
-const dashboardAPI = 'https://raw.githubusercontent.com/fardanahmed/recite-ml/refs/heads/master/data/data-uthmani.json'; // Predefined API URL
+// const dashboardAPI = 'https://raw.githubusercontent.com/fardanahmed/recite-ml/refs/heads/master/data/data-uthmani.json'; // Predefined API URL
 
-const dashboard = async () => {
-  const response = await axios.get(dashboardAPI);
-  const { data } = response;
-  const dashboardSurahs = data.quran.surahs.map((surah) => ({
-    num: surah.num,
-    name: surah.name,
-  }));
+const dashboard = () => {
+  const surahData = {};
+  // console.log('Surahs:', surahs['default']['1']);
 
-  if (!dashboardSurahs) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Surah not found');
+  for (let surah = 78; surah <= 114; surah += 1) {
+    const surahKey = surah.toString();
+    if (surahs[surahKey]) {
+      surahData[surahKey] = {
+        latin: surahs[surahKey].latin,
+        english: surahs[surahKey].english,
+      };
+    }
   }
-  return dashboardSurahs;
+
+  if (Object.keys(surahData).length === 0) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Error fetching Surah data');
+  }
+  return surahData;
 };
 
 const API_URL = 'https://raw.githubusercontent.com/fardanahmed/recite-ml/refs/heads/master/data/data-uthmani.json';
@@ -26,7 +33,7 @@ const getSurahById = async (surahId) => {
     const { data } = response;
     const surah = data.quran.surahs.find((s) => s.num === surahId);
     if (!surah) {
-      throw new Error('Surah not found');
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Surah not found');
     }
     return surah;
   } catch (error) {
