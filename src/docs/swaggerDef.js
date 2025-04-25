@@ -6,10 +6,6 @@ const swaggerDef = {
   info: {
     title: 'Recite Right API documentation',
     version,
-    license: {
-      name: 'MIT',
-      url: 'https://github.com/hagopj13/recite-right/blob/master/LICENSE',
-    },
   },
   servers: [
     {
