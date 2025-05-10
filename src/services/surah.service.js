@@ -20,7 +20,7 @@ const dashboard = () => {
   }
 
   if (Object.keys(surahData).length === 0) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Error fetching Surah data');
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Error fetching data');
   }
   return surahData;
 };
@@ -37,7 +37,7 @@ const getSurahById = async (surahId) => {
     }
     return surah;
   } catch (error) {
-    throw new Error('Error fetching Surah data');
+    throw new Error('Error fetching data from id');
   }
 };
 
