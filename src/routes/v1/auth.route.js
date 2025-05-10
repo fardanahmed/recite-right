@@ -26,6 +26,35 @@ module.exports = router;
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     AuthTokens:
+ *       type: object
+ *       properties:
+ *         access:
+ *           type: object
+ *           properties:
+ *             token:
+ *               type: string
+ *               example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *             expires:
+ *               type: string
+ *               format: date-time
+ *               example: "2024-03-20T12:00:00Z"
+ *         refresh:
+ *           type: object
+ *           properties:
+ *             token:
+ *               type: string
+ *               example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *             expires:
+ *               type: string
+ *               format: date-time
+ *               example: "2024-03-27T12:00:00Z"
+ */
+
+/**
+ * @swagger
  * /auth/register:
  *   post:
  *     summary: Register a user
@@ -44,28 +73,55 @@ module.exports = router;
  *             properties:
  *               name:
  *                 type: string
+ *                 example: John Doe
  *               email:
  *                 type: string
  *                 format: email
  *                 description: must be unique
+ *                 example: john.doe@example.com
  *               password:
  *                 type: string
  *                 format: password
  *                 minLength: 8
  *                 description: At least one number and one letter
- *             example:
- *               name: fake name
- *               email: fake@example.com
- *               password: password1
+ *                 example: password123
  *     responses:
  *       "201":
  *         description: Created
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '#/components/schemas/User'
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *                 tokens:
+ *                   $ref: '#/components/schemas/AuthTokens'
+ *             example:
+ *               user:
+ *                 id: "507f1f77bcf86cd799439011"
+ *                 name: "John Doe"
+ *                 email: "john.doe@example.com"
+ *                 role: "user"
+ *                 isEmailVerified: false
+ *                 createdAt: "2024-03-20T12:00:00Z"
+ *                 updatedAt: "2024-03-20T12:00:00Z"
+ *               tokens:
+ *                 access:
+ *                   token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *                   expires: "2024-03-20T12:00:00Z"
+ *                 refresh:
+ *                   token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *                   expires: "2024-03-27T12:00:00Z"
  *       "400":
- *         $ref: '#/components/responses/DuplicateEmail'
+ *         description: Invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               code: 400
+ *               message: "Email already taken"
  */
 
 /**
@@ -88,12 +144,11 @@ module.exports = router;
  *               email:
  *                 type: string
  *                 format: email
+ *                 example: john.doe@example.com
  *               password:
  *                 type: string
  *                 format: password
- *             example:
- *               email: fake@example.com
- *               password: password1
+ *                 example: password123
  *     responses:
  *       "200":
  *         description: OK
@@ -102,24 +157,35 @@ module.exports = router;
  *             schema:
  *               type: object
  *               properties:
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *                 tokens:
+ *                   $ref: '#/components/schemas/AuthTokens'
+ *             example:
+ *               user:
+ *                 id: "507f1f77bcf86cd799439011"
+ *                 name: "John Doe"
+ *                 email: "john.doe@example.com"
+ *                 role: "user"
+ *                 isEmailVerified: false
+ *                 createdAt: "2024-03-20T12:00:00Z"
+ *                 updatedAt: "2024-03-20T12:00:00Z"
+ *               tokens:
  *                 access:
- *                   type: object
- *                   properties:
- *                     token:
- *                       type: string
- *                     expires:
- *                       type: string
- *                       format: date-time
+ *                   token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *                   expires: "2024-03-20T12:00:00Z"
  *                 refresh:
- *                   type: object
- *                   properties:
- *                     token:
- *                       type: string
- *                     expires:
- *                       type: string
- *                       format: date-time
+ *                   token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *                   expires: "2024-03-27T12:00:00Z"
  *       "401":
- *         $ref: '#/components/responses/Unauthorized'
+ *         description: Invalid email or password
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               code: 401
+ *               message: "Incorrect email or password"
  */
 
 /**
@@ -142,13 +208,19 @@ module.exports = router;
  *             properties:
  *               refreshToken:
  *                 type: string
- *             example:
- *               refreshToken: "refresh_token"
+ *                 example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
  *     responses:
  *       "204":
  *         description: No content
  *       "401":
- *         $ref: '#/components/responses/Unauthorized'
+ *         description: Invalid refresh token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               code: 401
+ *               message: "Invalid refresh token"
  */
 
 /**
@@ -169,34 +241,30 @@ module.exports = router;
  *             properties:
  *               refreshToken:
  *                 type: string
- *             example:
- *               refreshToken: "refresh_token"
+ *                 example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
  *     responses:
  *       "200":
  *         description: OK
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 access:
- *                   type: object
- *                   properties:
- *                     token:
- *                       type: string
- *                     expires:
- *                       type: string
- *                       format: date-time
- *                 refresh:
- *                   type: object
- *                   properties:
- *                     token:
- *                       type: string
- *                     expires:
- *                       type: string
- *                       format: date-time
+ *               $ref: '#/components/schemas/AuthTokens'
+ *             example:
+ *               access:
+ *                 token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *                 expires: "2024-03-20T12:00:00Z"
+ *               refresh:
+ *                 token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *                 expires: "2024-03-27T12:00:00Z"
  *       "401":
- *         $ref: '#/components/responses/Unauthorized'
+ *         description: Invalid refresh token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               code: 401
+ *               message: "Invalid refresh token"
  */
 
 /**

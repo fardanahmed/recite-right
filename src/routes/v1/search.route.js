@@ -12,6 +12,28 @@ const searchController = require('../../controllers/search.controller');
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     SearchResult:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           example: "507f1f77bcf86cd799439011"
+ *         name:
+ *           type: string
+ *           example: "Al-Fatiha"
+ *         type:
+ *           type: string
+ *           enum: [surah, ayah]
+ *           example: "surah"
+ *         text:
+ *           type: string
+ *           example: "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ"
+ */
+
+/**
+ * @swagger
  * /search:
  *   get:
  *     summary: Search for items
@@ -24,6 +46,7 @@ const searchController = require('../../controllers/search.controller');
  *         schema:
  *           type: string
  *         description: Search query
+ *         example: "fatiha"
  *     responses:
  *       "200":
  *         description: OK
@@ -35,14 +58,22 @@ const searchController = require('../../controllers/search.controller');
  *                 results:
  *                   type: array
  *                   items:
- *                     type: object
- *                     properties:
- *                       id:
- *                         type: string
- *                       name:
- *                         type: string
+ *                     $ref: '#/components/schemas/SearchResult'
+ *             example:
+ *               results:
+ *                 - id: "507f1f77bcf86cd799439011"
+ *                   name: "Al-Fatiha"
+ *                   type: "surah"
+ *                   text: "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ"
  *       "400":
- *         $ref: '#/components/responses/BadRequest'
+ *         description: Invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               code: 400
+ *               message: "Search query is required"
  */
 
 router.get('/search', searchController.search);

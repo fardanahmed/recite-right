@@ -43,6 +43,45 @@ module.exports = router;
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     Surah:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           example: "507f1f77bcf86cd799439011"
+ *         name:
+ *           type: string
+ *           example: "Al-Fatiha"
+ *         nameTranslation:
+ *           type: string
+ *           example: "The Opening"
+ *         numberOfAyahs:
+ *           type: integer
+ *           example: 7
+ *         revelationType:
+ *           type: string
+ *           enum: [Meccan, Medinan]
+ *           example: "Meccan"
+ *         ayahs:
+ *           type: array
+ *           items:
+ *             type: object
+ *             properties:
+ *               number:
+ *                 type: integer
+ *                 example: 1
+ *               text:
+ *                 type: string
+ *                 example: "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ"
+ *               translation:
+ *                 type: string
+ *                 example: "In the name of Allah, the Entirely Merciful, the Especially Merciful."
+ */
+
+/**
+ * @swagger
  * /surah/dashboard:
  *   get:
  *     summary: Get dashboard surahs
@@ -56,14 +95,26 @@ module.exports = router;
  *             schema:
  *               type: array
  *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: string
- *                   name:
- *                     type: string
+ *                 $ref: '#/components/schemas/Surah'
+ *             example:
+ *               - id: "507f1f77bcf86cd799439011"
+ *                 name: "Al-Fatiha"
+ *                 nameTranslation: "The Opening"
+ *                 numberOfAyahs: 7
+ *                 revelationType: "Meccan"
+ *                 ayahs:
+ *                   - number: 1
+ *                     text: "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ"
+ *                     translation: "In the name of Allah, the Entirely Merciful, the Especially Merciful."
  *       "400":
- *         $ref: '#/components/responses/BadRequest'
+ *         description: Invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               code: 400
+ *               message: "Invalid request"
  */
 
 /**
@@ -80,18 +131,31 @@ module.exports = router;
  *         schema:
  *           type: string
  *         description: Surah ID
+ *         example: "507f1f77bcf86cd799439011"
  *     responses:
  *       "200":
  *         description: OK
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 id:
- *                   type: string
- *                 name:
- *                   type: string
+ *               $ref: '#/components/schemas/Surah'
+ *             example:
+ *               id: "507f1f77bcf86cd799439011"
+ *               name: "Al-Fatiha"
+ *               nameTranslation: "The Opening"
+ *               numberOfAyahs: 7
+ *               revelationType: "Meccan"
+ *               ayahs:
+ *                 - number: 1
+ *                   text: "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ"
+ *                   translation: "In the name of Allah, the Entirely Merciful, the Especially Merciful."
  *       "404":
- *         $ref: '#/components/responses/NotFound'
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               code: 404
+ *               message: "Surah not found"
  */

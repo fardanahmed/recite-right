@@ -28,6 +28,40 @@ module.exports = router;
 
 /**
  * @swagger
+ * components:
+ *   schemas:
+ *     User:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           example: "507f1f77bcf86cd799439011"
+ *         name:
+ *           type: string
+ *           example: "John Doe"
+ *         email:
+ *           type: string
+ *           format: email
+ *           example: "john.doe@example.com"
+ *         role:
+ *           type: string
+ *           enum: [user, admin]
+ *           example: "user"
+ *         isEmailVerified:
+ *           type: boolean
+ *           example: false
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           example: "2024-03-20T12:00:00Z"
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           example: "2024-03-20T12:00:00Z"
+ */
+
+/**
+ * @swagger
  * /users:
  *   post:
  *     summary: Create a user
@@ -49,36 +83,64 @@ module.exports = router;
  *             properties:
  *               name:
  *                 type: string
+ *                 example: "John Doe"
  *               email:
  *                 type: string
  *                 format: email
  *                 description: must be unique
+ *                 example: "john.doe@example.com"
  *               password:
  *                 type: string
  *                 format: password
  *                 minLength: 8
  *                 description: At least one number and one letter
+ *                 example: "password123"
  *               role:
- *                  type: string
- *                  enum: [user, admin]
- *             example:
- *               name: fake name
- *               email: fake@example.com
- *               password: password1
- *               role: user
+ *                 type: string
+ *                 enum: [user, admin]
+ *                 example: "user"
  *     responses:
  *       "201":
  *         description: Created
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '#/components/schemas/User'
+ *               $ref: '#/components/schemas/User'
+ *             example:
+ *               id: "507f1f77bcf86cd799439011"
+ *               name: "John Doe"
+ *               email: "john.doe@example.com"
+ *               role: "user"
+ *               isEmailVerified: false
+ *               createdAt: "2024-03-20T12:00:00Z"
+ *               updatedAt: "2024-03-20T12:00:00Z"
  *       "400":
- *         $ref: '#/components/responses/DuplicateEmail'
+ *         description: Invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               code: 400
+ *               message: "Email already taken"
  *       "401":
- *         $ref: '#/components/responses/Unauthorized'
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               code: 401
+ *               message: "Please authenticate"
  *       "403":
- *         $ref: '#/components/responses/Forbidden'
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               code: 403
+ *               message: "Forbidden"
  *
  *   get:
  *     summary: Get all users
@@ -92,16 +154,19 @@ module.exports = router;
  *         schema:
  *           type: string
  *         description: User name
+ *         example: "John"
  *       - in: query
  *         name: role
  *         schema:
  *           type: string
  *         description: User role
+ *         example: "user"
  *       - in: query
  *         name: sortBy
  *         schema:
  *           type: string
  *         description: sort by query in the form of field:desc/asc (ex. name:asc)
+ *         example: "name:asc"
  *       - in: query
  *         name: limit
  *         schema:
@@ -109,6 +174,7 @@ module.exports = router;
  *           minimum: 1
  *         default: 10
  *         description: Maximum number of users
+ *         example: 10
  *       - in: query
  *         name: page
  *         schema:
@@ -116,6 +182,7 @@ module.exports = router;
  *           minimum: 1
  *           default: 1
  *         description: Page number
+ *         example: 1
  *     responses:
  *       "200":
  *         description: OK
@@ -140,10 +207,37 @@ module.exports = router;
  *                 totalResults:
  *                   type: integer
  *                   example: 1
+ *             example:
+ *               results:
+ *                 - id: "507f1f77bcf86cd799439011"
+ *                   name: "John Doe"
+ *                   email: "john.doe@example.com"
+ *                   role: "user"
+ *                   isEmailVerified: false
+ *                   createdAt: "2024-03-20T12:00:00Z"
+ *                   updatedAt: "2024-03-20T12:00:00Z"
+ *               page: 1
+ *               limit: 10
+ *               totalPages: 1
+ *               totalResults: 1
  *       "401":
- *         $ref: '#/components/responses/Unauthorized'
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               code: 401
+ *               message: "Please authenticate"
  *       "403":
- *         $ref: '#/components/responses/Forbidden'
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               code: 403
+ *               message: "Forbidden"
  */
 
 /**
@@ -162,19 +256,49 @@ module.exports = router;
  *         schema:
  *           type: string
  *         description: User id
+ *         example: "507f1f77bcf86cd799439011"
  *     responses:
  *       "200":
  *         description: OK
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '#/components/schemas/User'
+ *               $ref: '#/components/schemas/User'
+ *             example:
+ *               id: "507f1f77bcf86cd799439011"
+ *               name: "John Doe"
+ *               email: "john.doe@example.com"
+ *               role: "user"
+ *               isEmailVerified: false
+ *               createdAt: "2024-03-20T12:00:00Z"
+ *               updatedAt: "2024-03-20T12:00:00Z"
  *       "401":
- *         $ref: '#/components/responses/Unauthorized'
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               code: 401
+ *               message: "Please authenticate"
  *       "403":
- *         $ref: '#/components/responses/Forbidden'
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               code: 403
+ *               message: "Forbidden"
  *       "404":
- *         $ref: '#/components/responses/NotFound'
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               code: 404
+ *               message: "User not found"
  *
  *   patch:
  *     summary: Update a user
@@ -189,6 +313,7 @@ module.exports = router;
  *         schema:
  *           type: string
  *         description: User id
+ *         example: "507f1f77bcf86cd799439011"
  *     requestBody:
  *       required: true
  *       content:
@@ -198,38 +323,73 @@ module.exports = router;
  *             properties:
  *               name:
  *                 type: string
+ *                 example: "John Doe"
  *               email:
  *                 type: string
  *                 format: email
  *                 description: must be unique
+ *                 example: "john.doe@example.com"
  *               password:
  *                 type: string
  *                 format: password
  *                 minLength: 8
  *                 description: At least one number and one letter
+ *                 example: "password123"
  *               role:
- *                  type: string
- *                  enum: [user, admin]
- *             example:
- *               name: fake name
- *               email: fake@example.com
- *               password: password1
- *               role: user
+ *                 type: string
+ *                 enum: [user, admin]
+ *                 example: "user"
  *     responses:
  *       "200":
  *         description: OK
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '#/components/schemas/User'
+ *               $ref: '#/components/schemas/User'
+ *             example:
+ *               id: "507f1f77bcf86cd799439011"
+ *               name: "John Doe"
+ *               email: "john.doe@example.com"
+ *               role: "user"
+ *               isEmailVerified: false
+ *               createdAt: "2024-03-20T12:00:00Z"
+ *               updatedAt: "2024-03-20T12:00:00Z"
  *       "400":
- *         $ref: '#/components/responses/DuplicateEmail'
+ *         description: Invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               code: 400
+ *               message: "Email already taken"
  *       "401":
- *         $ref: '#/components/responses/Unauthorized'
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               code: 401
+ *               message: "Please authenticate"
  *       "403":
- *         $ref: '#/components/responses/Forbidden'
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               code: 403
+ *               message: "Forbidden"
  *       "404":
- *         $ref: '#/components/responses/NotFound'
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               code: 404
+ *               message: "User not found"
  *
  *   delete:
  *     summary: Delete a user
@@ -244,13 +404,35 @@ module.exports = router;
  *         schema:
  *           type: string
  *         description: User id
+ *         example: "507f1f77bcf86cd799439011"
  *     responses:
  *       "200":
  *         description: No content
  *       "401":
- *         $ref: '#/components/responses/Unauthorized'
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               code: 401
+ *               message: "Please authenticate"
  *       "403":
- *         $ref: '#/components/responses/Forbidden'
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               code: 403
+ *               message: "Forbidden"
  *       "404":
- *         $ref: '#/components/responses/NotFound'
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               code: 404
+ *               message: "User not found"
  */
