@@ -33,3 +33,65 @@ module.exports = router;
 //     });
 //   }
 // });
+
+/**
+ * @swagger
+ * tags:
+ *   name: Surah
+ *   description: Surah management and retrieval
+ */
+
+/**
+ * @swagger
+ * /surah/dashboard:
+ *   get:
+ *     summary: Get dashboard surahs
+ *     description: Retrieve surahs for the dashboard.
+ *     tags: [Surah]
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   name:
+ *                     type: string
+ *       "400":
+ *         $ref: '#/components/responses/BadRequest'
+ */
+
+/**
+ * @swagger
+ * /surah/get-surah/{surahId}:
+ *   post:
+ *     summary: Get a surah by ID
+ *     description: Retrieve a specific surah by its ID.
+ *     tags: [Surah]
+ *     parameters:
+ *       - in: path
+ *         name: surahId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Surah ID
+ *     responses:
+ *       "200":
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                 name:
+ *                   type: string
+ *       "404":
+ *         $ref: '#/components/responses/NotFound'
+ */
