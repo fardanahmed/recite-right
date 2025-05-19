@@ -4,7 +4,7 @@ const { dashboardSurah, SurahById } = require('../../controllers/surah.controlle
 const router = express.Router();
 
 router.get('/dashboard', dashboardSurah);
-router.post('/get-surah/:surahId', SurahById);
+router.get('/get-surah/:surahId', SurahById);
 
 module.exports = router;
 
@@ -78,14 +78,34 @@ module.exports = router;
  *               translation:
  *                 type: string
  *                 example: "In the name of Allah, the Entirely Merciful, the Especially Merciful."
+ *     SurahData:
+ *       type: object
+ *       properties:
+ *         latin:
+ *           type: string
+ *           example: "An-Naba"
+ *         english:
+ *           type: string
+ *           example: "The Tidings"
+ *     DashboardResponse:
+ *       type: object
+ *       additionalProperties:
+ *         $ref: '#/components/schemas/SurahData'
+ *       example:
+ *         "78":
+ *           latin: "An-Naba"
+ *           english: "The Tidings"
+ *         "79":
+ *           latin: "An-Nazi'at"
+ *           english: "Those Who Drag Forth"
  */
 
 /**
  * @swagger
- * /surah/dashboard:
+ * /v1/surah/dashboard:
  *   get:
- *     summary: Get dashboard surahs
- *     description: Retrieve surahs for the dashboard.
+ *     summary: Get surahs 78-114
+ *     description: Retrieve information about surahs 78 through 114, including their Latin and English names.
  *     tags: [Surah]
  *     responses:
  *       "200":
@@ -93,34 +113,26 @@ module.exports = router;
  *         content:
  *           application/json:
  *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Surah'
- *             example:
- *               - id: "507f1f77bcf86cd799439011"
- *                 name: "Al-Fatiha"
- *                 nameTranslation: "The Opening"
- *                 numberOfAyahs: 7
- *                 revelationType: "Meccan"
- *                 ayahs:
- *                   - number: 1
- *                     text: "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ"
- *                     translation: "In the name of Allah, the Entirely Merciful, the Especially Merciful."
+ *               $ref: '#/components/schemas/DashboardResponse'
  *       "400":
- *         description: Invalid input
+ *         description: Bad Request
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Error'
- *             example:
- *               code: 400
- *               message: "Invalid request"
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 400
+ *                 message:
+ *                   type: string
+ *                   example: "Error fetching data"
  */
 
 /**
  * @swagger
- * /surah/get-surah/{surahId}:
- *   post:
+ * /v1/surah/get-surah/{surahId}:
+ *   get:
  *     summary: Get a surah by ID
  *     description: Retrieve a specific surah by its ID.
  *     tags: [Surah]

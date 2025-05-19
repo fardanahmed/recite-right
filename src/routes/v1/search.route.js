@@ -7,46 +7,29 @@ const searchController = require('../../controllers/search.controller');
  * @swagger
  * tags:
  *   name: Search
- *   description: Search functionality
+ *   description: Search functionality for Quranic content
  */
 
 /**
  * @swagger
  * components:
  *   schemas:
- *     SearchResult:
+ *     SurahData:
  *       type: object
  *       properties:
- *         id:
+ *         latin:
  *           type: string
- *           example: "507f1f77bcf86cd799439011"
- *         name:
- *           type: string
- *           example: "Al-Fatiha"
- *         type:
- *           type: string
- *           enum: [surah, ayah]
- *           example: "surah"
- *         text:
- *           type: string
- *           example: "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ"
+ *           description: Latin name of the surah
+ *           example: "An-Naba"
  */
 
 /**
  * @swagger
- * /search:
+ * /v1/search:
  *   get:
- *     summary: Search for items
- *     description: Search for items based on a query.
+ *     summary: Get information about Surahs 78-114
+ *     description: Returns a list of surahs from 78 to 114 with their Latin names
  *     tags: [Search]
- *     parameters:
- *       - in: query
- *         name: q
- *         required: true
- *         schema:
- *           type: string
- *         description: Search query
- *         example: "fatiha"
  *     responses:
  *       "200":
  *         description: OK
@@ -55,27 +38,31 @@ const searchController = require('../../controllers/search.controller');
  *             schema:
  *               type: object
  *               properties:
- *                 results:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/SearchResult'
+ *                 response:
+ *                   type: object
+ *                   additionalProperties:
+ *                     $ref: '#/components/schemas/SurahData'
  *             example:
- *               results:
- *                 - id: "507f1f77bcf86cd799439011"
- *                   name: "Al-Fatiha"
- *                   type: "surah"
- *                   text: "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ"
+ *               response:
+ *                 "78":
+ *                   latin: "An-Naba"
+ *                 "79":
+ *                   latin: "An-Nazi'at"
  *       "400":
- *         description: Invalid input
+ *         description: Bad Request
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Error'
- *             example:
- *               code: 400
- *               message: "Search query is required"
+ *               type: object
+ *               properties:
+ *                 code:
+ *                   type: integer
+ *                   example: 400
+ *                 message:
+ *                   type: string
+ *                   example: "Error fetching data"
  */
 
-router.get('/search', searchController.search);
+router.get('/', searchController.search);
 
 module.exports = router;
