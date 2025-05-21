@@ -1,5 +1,8 @@
 // const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
+const ApiError = require('../utils/ApiError');
+const ApiResponse = require('../utils/response');
+const httpStatus = require('http-status');
 const { dashboard, getSurahById } = require('../services/surah.service');
 
 // const dashboardSurah = catchAsync(async (req, res) => {
@@ -12,13 +15,19 @@ const { dashboard, getSurahById } = require('../services/surah.service');
 
 const dashboardSurah = catchAsync(async (req, res) => {
   const response = await dashboard();
-  res.send({ response });
+  if (!response) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Dashboard data not found');
+  }
+  return ApiResponse.success(res, response);
 });
 
 const SurahById = catchAsync(async (req, res) => {
   const { surahId } = req.params;
   const surah = await getSurahById(surahId);
-  res.send({ surah });
+  if (!surah) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Surah not found');
+  }
+  return ApiResponse.success(res, surah);
 });
 
 module.exports = {

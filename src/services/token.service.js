@@ -6,6 +6,7 @@ const userService = require('./user.service');
 const { Token } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { tokenTypes } = require('../config/tokens');
+const mongoose = require('mongoose');
 
 /**
  * Generate token
@@ -54,13 +55,16 @@ const saveToken = async (token, userId, expires, type, blacklisted = false) => {
 const verifyToken = async (token, type) => {
   try {
     const payload = jwt.verify(token, config.jwt.secret);
-    const tokenDoc = await Token.findOne({ token, type, user: payload.sub, blacklisted: false });
+    const tokenDoc = await Token.findOne({ token, type, user: mongoose.Types.ObjectId(payload.sub), blacklisted: false });
     if (!tokenDoc) {
-      throw new Error(`Token not found for type: ${type}`);
+      throw new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate');
     }
     return tokenDoc;
   } catch (error) {
-    throw new Error(`Token verification failed: ${error.message}`);
+    if (error instanceof jwt.JsonWebTokenError) {
+      throw new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate');
+    }
+    throw error;
   }
 };
 

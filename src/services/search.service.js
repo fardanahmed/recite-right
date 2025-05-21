@@ -1,24 +1,19 @@
-const httpStatus = require('http-status');
-const ApiError = require('../utils/ApiError');
-const surahs = require('../components/surahs');
+/* eslint-disable prettier/prettier */
+const { Surah } = require('../models');
 
-const searchService = () => {
-  const surahData = {};
-  // console.log('Surahs:', surahs['default']['1']);
-
-  for (let surah = 78; surah <= 114; surah += 1) {
-    const surahKey = surah.toString();
-    if (surahs[surahKey]) {
-      surahData[surahKey] = {
-        latin: surahs[surahKey].latin,
-      };
+const searchService = async (query) => {
+  const searchQuery = query
+    ? {
+      $or: [
+        { name: { $regex: query, $options: 'i' } },
+        { englishName: { $regex: query, $options: 'i' } },
+        { englishNameTranslation: { $regex: query, $options: 'i' } },
+      ],
     }
-  }
+    : {};
 
-  if (Object.keys(surahData).length === 0) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Error fetching Surah');
-  }
-  return surahData;
+  const surahs = await Surah.find(searchQuery).sort({ numberOfAyahs: 1 });
+  return surahs;
 };
 
 module.exports = {

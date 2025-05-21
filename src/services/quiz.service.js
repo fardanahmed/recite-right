@@ -1,5 +1,10 @@
 const { GoogleGenAI } = require('@google/genai');
 const dotenv = require('dotenv');
+const ApiError = require('../utils/ApiError');
+const httpStatus = require('http-status');
+const mongoose = require('mongoose');
+const { Quiz } = require('../models');
+
 // Load environment variables from .env file
 dotenv.config();
 
@@ -11,92 +16,7 @@ if (!process.env.GEMINI_API_KEY) {
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const MODEL_NAME = 'gemini-2.0-flash-001';
 
-// Function to parse the quiz text into structured data
-function parseQuiz(text) {
-  if (!text || typeof text !== 'string') {
-    throw new Error('Invalid quiz text format');
-  }
-
-  const questions = [];
-  const lines = text.split('\n');
-  let currentQuestion = null;
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim();
-
-    // Skip empty lines
-    if (!line) continue;
-
-    // Check if line is a question (starts with a number and dot)
-    if (/^\d+\./.test(line)) {
-      if (currentQuestion) {
-        questions.push(currentQuestion);
-      }
-      currentQuestion = {
-        question: line.replace(/^\d+\.\s*/, ''),
-        options: [],
-        correctAnswer: '',
-      };
-    }
-    // Check if line is an option (starts with a letter and parenthesis)
-    else if (/^[A-D][).]\s/.test(line)) {
-      if (currentQuestion) {
-        const option = line.replace(/^[A-D][).]\s*/, '');
-        currentQuestion.options.push(option);
-      }
-    }
-    // Check if line contains the answer
-    else if (line.toLowerCase().includes('answer:') || line.toLowerCase().includes('correct answer:')) {
-      if (currentQuestion) {
-        const answer = line.split(':')[1].trim();
-        currentQuestion.correctAnswer = answer;
-      }
-    }
-  }
-
-  // Add the last question if exists
-  if (currentQuestion) {
-    questions.push(currentQuestion);
-  }
-
-  // Validate the parsed questions
-  const validQuestions = questions.filter(
-    (q) =>
-      q.question &&
-      q.options.length === 4 &&
-      q.correctAnswer &&
-      ['A', 'B', 'C', 'D'].includes(q.correctAnswer.toUpperCase()),
-  );
-
-  if (validQuestions.length === 0) {
-    throw new Error('No valid questions could be parsed from the response');
-  }
-
-  return validQuestions;
-}
-
-const Quiz = async (req, res) => {
-  try {
-    // Validate request body
-    if (!req.body || typeof req.body !== 'object') {
-      return res.status(400).json({
-        success: false,
-        error: 'Invalid request body format',
-      });
-    }
-
-    // Set default values and validate
-    const topic = req.body.topic || 'Surahs 78 to 114 of the Quran';
-    const numQuestions = parseInt(req.body.numQuestions) || 15;
-
-    if (numQuestions < 1 || numQuestions > 20) {
-      return res.status(400).json({
-        success: false,
-        error: 'Number of questions must be between 1 and 20',
-      });
-    }
-
-    const prompt = `Generate a quiz about ${topic} with ${numQuestions} multiple choice questions.
+const QUIZ_PROMPT_TEMPLATE = `Generate a quiz about {topic} with {numQuestions} multiple choice questions.
 Each question should be formatted exactly as follows:
 
 1. [Question text]
@@ -113,42 +33,139 @@ Requirements:
 - Include a blank line between questions
 - Make sure each question is numbered sequentially`;
 
-    const result = await ai.models.generateContent({
-      model: MODEL_NAME,
-      contents: prompt,
-    });
-
-    // Extract and parse the generated text
-    const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) {
-      return res.status(500).json({
-        success: false,
-        error: 'Failed to generate quiz content',
-      });
-    }
-
-    const quizData = parseQuiz(text);
-
-    return res.json({
-      success: true,
-      data: {
-        questions: quizData,
-        statistics: {
-          totalQuestions: quizData.length,
-          completeQuestions: quizData.filter((q) => q.options.length === 4).length,
-          questionsWithAnswers: quizData.filter((q) => q.correctAnswer).length,
-        },
-      },
-    });
-  } catch (error) {
-    //console.error('Error generating quiz:', error);
-    return res.status(500).json({
-      success: false,
-      error: error.message || 'Failed to generate quiz',
-    });
+// Function to parse the quiz text into structured data
+function parseQuiz(text) {
+  if (!text?.trim()) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid quiz text format');
   }
+
+  const questions = [];
+  const lines = text.split('\n');
+  let currentQuestion = null;
+
+  for (const line of lines) {
+    const trimmedLine = line.trim();
+    if (!trimmedLine) continue;
+
+    if (/^\d+\./.test(trimmedLine)) {
+      if (currentQuestion) questions.push(currentQuestion);
+      currentQuestion = {
+        _id: new mongoose.Types.ObjectId(),
+        question: trimmedLine.replace(/^\d+\.\s*/, ''),
+        options: [],
+        correctAnswer: 0,
+      };
+    } else if (/^[A-D][).]\s/.test(trimmedLine)) {
+      currentQuestion?.options.push(trimmedLine.replace(/^[A-D][).]\s*/, ''));
+    } else if (trimmedLine.toLowerCase().includes('answer:')) {
+      const answer = trimmedLine.split(':')[1].trim().toUpperCase();
+      if (currentQuestion) {
+        currentQuestion.correctAnswer = answer.charCodeAt(0) - 65;
+      }
+    }
+  }
+
+  if (currentQuestion) questions.push(currentQuestion);
+
+  const validQuestions = questions.filter(
+    (q) =>
+      q.question?.trim() &&
+      q.options?.length === 4 &&
+      Number.isInteger(q.correctAnswer) &&
+      q.correctAnswer >= 0 &&
+      q.correctAnswer <= 3,
+  );
+
+  if (!validQuestions.length) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'No valid questions could be parsed from the response');
+  }
+
+  return validQuestions;
+}
+
+const generateQuiz = async (topic = 'Surah 78 to 114', numQuestions = 10, userId) => {
+  const prompt = QUIZ_PROMPT_TEMPLATE.replace('{topic}', topic).replace('{numQuestions}', numQuestions);
+
+  const result = await ai.models.generateContent({
+    model: MODEL_NAME,
+    contents: prompt,
+  });
+
+  const text =
+    result?.candidates?.[0]?.content?.parts?.[0]?.text ??
+    (() => {
+      throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to generate quiz content');
+    })();
+
+  const quizData = parseQuiz(text);
+
+  return Quiz.create({
+    title: `${topic} Quiz`,
+    description: `A quiz about ${topic} with ${numQuestions} questions`,
+    questions: quizData,
+    createdBy: userId,
+    status: 'active',
+  });
+};
+
+const submitQuiz = async (quizId, answers, userId) => {
+  const quiz = await Quiz.findById(quizId).lean();
+  if (!quiz) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Quiz not found');
+  }
+
+  const questionMap = new Map(quiz.questions.map((q) => [q._id.toString(), q]));
+  const attemptAnswers = answers.map((answer) => {
+    const question = questionMap.get(answer.questionId);
+    const isCorrect = question?.correctAnswer === answer.selectedOption;
+    return {
+      questionId: answer.questionId,
+      selectedOption: answer.selectedOption,
+      isCorrect,
+    };
+  });
+
+  const score = attemptAnswers.filter((a) => a.isCorrect).length;
+  const attempt = {
+    user: userId,
+    startedAt: new Date(),
+    completedAt: new Date(),
+    answers: attemptAnswers,
+    score,
+    timeSpent: 0,
+  };
+
+  await Quiz.findByIdAndUpdate(quizId, {
+    $push: { attempts: attempt },
+  });
+
+  return {
+    score,
+    totalQuestions: quiz.questions.length,
+    correctAnswers: score,
+    attemptId: attempt._id,
+  };
+};
+
+const getUserQuizzes = async (userId) => {
+  return Quiz.find({
+    $or: [{ createdBy: userId }, { 'attempts.user': userId }],
+  })
+    .sort({ createdAt: -1 })
+    .lean();
+};
+
+const getQuizById = async (quizId) => {
+  const quiz = await Quiz.findById(quizId).lean();
+  if (!quiz) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Quiz not found');
+  }
+  return quiz;
 };
 
 module.exports = {
-  Quiz,
+  generateQuiz,
+  submitQuiz,
+  getUserQuizzes,
+  getQuizById,
 };
