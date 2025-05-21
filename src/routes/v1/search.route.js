@@ -14,6 +14,18 @@ const searchController = require('../../controllers/search.controller');
  * @swagger
  * components:
  *   schemas:
+ *     Error:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *           example: false
+ *         message:
+ *           type: string
+ *           example: "Invalid input"
+ *         error:
+ *           type: string
+ *           example: "Error fetching data"
  *     SurahData:
  *       type: object
  *       properties:
@@ -38,29 +50,32 @@ const searchController = require('../../controllers/search.controller');
  *             schema:
  *               type: object
  *               properties:
- *                 response:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Search results retrieved successfully"
+ *                 data:
  *                   type: object
- *                   additionalProperties:
- *                     $ref: '#/components/schemas/SurahData'
- *             example:
- *               response:
- *                 "78":
- *                   latin: "An-Naba"
- *                 "79":
- *                   latin: "An-Nazi'at"
+ *                   properties:
+ *                     response:
+ *                       type: object
+ *                       additionalProperties:
+ *                         $ref: '#/components/schemas/SurahData'
+ *                       example:
+ *                         "78":
+ *                           latin: "An-Naba"
+ *                         "79":
+ *                           latin: "An-Nazi'at"
+ *                 error:
+ *                   type: null
  *       "400":
  *         description: Bad Request
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 code:
- *                   type: integer
- *                   example: 400
- *                 message:
- *                   type: string
- *                   example: "Error fetching data"
+ *               $ref: '#/components/schemas/Error'
  */
 
 router.get('/', searchController.search);

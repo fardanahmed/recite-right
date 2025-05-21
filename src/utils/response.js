@@ -6,6 +6,7 @@ class ApiResponse {
       success: true,
       message,
       data,
+      error: null,
     });
   }
 

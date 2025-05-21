@@ -5,8 +5,8 @@ const ApiResponse = require('../utils/response');
 const httpStatus = require('http-status');
 
 const getQuiz = catchAsync(async (req, res) => {
-  const { topic, numQuestions } = req.body;
-  const result = await generateQuiz(topic || 'general knowledge', numQuestions || 10, req.user.id);
+  const { topic, numQuestions } = req.query;
+  const result = await generateQuiz(topic, numQuestions, req.user.id);
   return ApiResponse.success(res, result, 'Quiz generated successfully');
 });
 
@@ -43,6 +43,9 @@ const getQuizzes = catchAsync(async (req, res) => {
 
 const getQuizDetails = catchAsync(async (req, res) => {
   const quiz = await getQuizById(req.params.quizId);
+  if (!quiz) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Quiz not found');
+  }
   return ApiResponse.success(res, quiz, 'Quiz details retrieved successfully');
 });
 

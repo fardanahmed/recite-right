@@ -13,7 +13,7 @@ const setupTestDB = require('../utils/setupTestDB');
 const { User, Token } = require('../../src/models');
 const { tokenTypes } = require('../../src/config/tokens');
 const { userOne, admin, insertUsers } = require('../fixtures/user.fixture');
-const { userOneAccessToken, adminAccessToken } = require('../fixtures/token.fixture');
+const { userOneAccessToken } = require('../fixtures/token.fixture');
 
 setupTestDB();
 
@@ -761,12 +761,14 @@ describe('Auth middleware', () => {
 
   test('should call next with no errors if user has required rights', async () => {
     await insertUsers([admin]);
+    const expires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
+    const adminToken = tokenService.generateToken(admin._id, expires, tokenTypes.ACCESS);
     const req = httpMocks.createRequest({
-      headers: { Authorization: `Bearer ${adminAccessToken}` },
+      headers: { Authorization: `Bearer ${adminToken}` },
     });
     const next = jest.fn();
 
-    await auth('admin')(req, httpMocks.createResponse(), next);
+    await auth('getUsers')(req, httpMocks.createResponse(), next);
 
     expect(next).toHaveBeenCalledWith();
   });

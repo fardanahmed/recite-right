@@ -47,21 +47,33 @@ module.exports = router;
  * @swagger
  * components:
  *   schemas:
+ *     Error:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *           example: false
+ *         message:
+ *           type: string
+ *           example: "Invalid input"
+ *         error:
+ *           type: string
+ *           example: "Surah not found"
  *     Surah:
  *       type: object
  *       properties:
  *         id:
  *           type: string
- *           example: "507f1f77bcf86cd799439011"
+ *           example: "78"
  *         name:
  *           type: string
- *           example: "Al-Fatiha"
+ *           example: "An-Naba"
  *         nameTranslation:
  *           type: string
- *           example: "The Opening"
+ *           example: "The Tidings"
  *         numberOfAyahs:
  *           type: integer
- *           example: 7
+ *           example: 40
  *         revelationType:
  *           type: string
  *           enum: [Meccan, Medinan]
@@ -115,20 +127,24 @@ module.exports = router;
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/DashboardResponse'
- *       "400":
- *         description: Bad Request
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Surahs retrieved successfully"
+ *                 data:
+ *                   $ref: '#/components/schemas/DashboardResponse'
+ *                 error:
+ *                   type: null
+ *       "404":
+ *         description: Not found
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 code:
- *                   type: integer
- *                   example: 400
- *                 message:
- *                   type: string
- *                   example: "Error fetching data"
+ *               $ref: '#/components/schemas/Error'
  */
 
 /**
@@ -145,31 +161,29 @@ module.exports = router;
  *         schema:
  *           type: string
  *         description: Surah ID
- *         example: "507f1f77bcf86cd799439011"
+ *         example: "78"
  *     responses:
  *       "200":
  *         description: OK
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Surah'
- *             example:
- *               id: "507f1f77bcf86cd799439011"
- *               name: "Al-Fatiha"
- *               nameTranslation: "The Opening"
- *               numberOfAyahs: 7
- *               revelationType: "Meccan"
- *               ayahs:
- *                 - number: 1
- *                   text: "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ"
- *                   translation: "In the name of Allah, the Entirely Merciful, the Especially Merciful."
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Surah retrieved successfully"
+ *                 data:
+ *                   $ref: '#/components/schemas/Surah'
+ *                 error:
+ *                   type: null
  *       "404":
  *         description: Not found
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Error'
- *             example:
- *               code: 404
- *               message: "Surah not found"
  */

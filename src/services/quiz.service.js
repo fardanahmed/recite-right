@@ -83,7 +83,7 @@ function parseQuiz(text) {
   return validQuestions;
 }
 
-const generateQuiz = async (topic = 'Surah 78 to 114', numQuestions = 10, userId) => {
+const generateQuiz = async (topic, numQuestions = 10, userId) => {
   const prompt = QUIZ_PROMPT_TEMPLATE.replace('{topic}', topic).replace('{numQuestions}', numQuestions);
 
   const result = await ai.models.generateContent({
@@ -127,6 +127,7 @@ const submitQuiz = async (quizId, answers, userId) => {
 
   const score = attemptAnswers.filter((a) => a.isCorrect).length;
   const attempt = {
+    _id: new mongoose.Types.ObjectId(),
     user: userId,
     startedAt: new Date(),
     completedAt: new Date(),

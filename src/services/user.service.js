@@ -77,6 +77,7 @@ const deleteUserById = async (userId) => {
   }
   try {
     await User.deleteOne({ _id: userId });
+    return user;
   } catch (error) {
     throw new Error(`Failed to delete user: ${error.message}`);
   }

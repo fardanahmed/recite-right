@@ -31,12 +31,15 @@ module.exports = router;
  *     Error:
  *       type: object
  *       properties:
- *         code:
- *           type: integer
- *           example: 400
+ *         success:
+ *           type: boolean
+ *           example: false
  *         message:
  *           type: string
  *           example: "Invalid input"
+ *         error:
+ *           type: string
+ *           example: "Invalid email or password"
  *     User:
  *       type: object
  *       properties:
@@ -130,10 +133,21 @@ module.exports = router;
  *             schema:
  *               type: object
  *               properties:
- *                 user:
- *                   $ref: '#/components/schemas/User'
- *                 tokens:
- *                   $ref: '#/components/schemas/AuthTokens'
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "User registered successfully"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/User'
+ *                     tokens:
+ *                       $ref: '#/components/schemas/AuthTokens'
+ *                 error:
+ *                   type: null
  *       "400":
  *         description: Invalid input
  *         content:
@@ -175,10 +189,21 @@ module.exports = router;
  *             schema:
  *               type: object
  *               properties:
- *                 user:
- *                   $ref: '#/components/schemas/User'
- *                 tokens:
- *                   $ref: '#/components/schemas/AuthTokens'
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Login successful"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/User'
+ *                     tokens:
+ *                       $ref: '#/components/schemas/AuthTokens'
+ *                 error:
+ *                   type: null
  *       "401":
  *         description: Invalid email or password
  *         content:
@@ -210,7 +235,22 @@ module.exports = router;
  *                 example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
  *     responses:
  *       "204":
- *         description: No content
+ *         description: No Content
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Logout successful"
+ *                 data:
+ *                   type: null
+ *                 error:
+ *                   type: null
  *       "401":
  *         description: Unauthorized
  *         content:
@@ -224,7 +264,7 @@ module.exports = router;
  * /v1/auth/refresh-tokens:
  *   post:
  *     summary: Refresh auth tokens
- *     description: Refresh access and refresh tokens.
+ *     description: Refresh access token using refresh token.
  *     tags: [Auth]
  *     requestBody:
  *       required: true
@@ -244,7 +284,18 @@ module.exports = router;
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/AuthTokens'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Tokens refreshed successfully"
+ *                 data:
+ *                   $ref: '#/components/schemas/AuthTokens'
+ *                 error:
+ *                   type: null
  *       "401":
  *         description: Unauthorized
  *         content:
@@ -275,9 +326,24 @@ module.exports = router;
  *                 example: john.doe@example.com
  *     responses:
  *       "204":
- *         description: No content
- *       "401":
- *         description: Unauthorized
+ *         description: No Content
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Password reset email sent"
+ *                 data:
+ *                   type: null
+ *                 error:
+ *                   type: null
+ *       "400":
+ *         description: Invalid input
  *         content:
  *           application/json:
  *             schema:
@@ -289,8 +355,16 @@ module.exports = router;
  * /v1/auth/reset-password:
  *   post:
  *     summary: Reset password
- *     description: Reset password with token.
+ *     description: Reset password using token.
  *     tags: [Auth]
+ *     parameters:
+ *       - in: query
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Reset password token
+ *         example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
  *     requestBody:
  *       required: true
  *       content:
@@ -298,12 +372,8 @@ module.exports = router;
  *           schema:
  *             type: object
  *             required:
- *               - token
  *               - password
  *             properties:
- *               token:
- *                 type: string
- *                 example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
  *               password:
  *                 type: string
  *                 format: password
@@ -312,9 +382,24 @@ module.exports = router;
  *                 example: password123
  *     responses:
  *       "204":
- *         description: No content
- *       "401":
- *         description: Unauthorized
+ *         description: No Content
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Password reset successful"
+ *                 data:
+ *                   type: null
+ *                 error:
+ *                   type: null
+ *       "400":
+ *         description: Invalid input
  *         content:
  *           application/json:
  *             schema:
@@ -332,7 +417,22 @@ module.exports = router;
  *       - bearerAuth: []
  *     responses:
  *       "204":
- *         description: No content
+ *         description: No Content
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Verification email sent"
+ *                 data:
+ *                   type: null
+ *                 error:
+ *                   type: null
  *       "401":
  *         description: Unauthorized
  *         content:
@@ -346,25 +446,36 @@ module.exports = router;
  * /v1/auth/verify-email:
  *   post:
  *     summary: Verify email
- *     description: Verify email with token.
+ *     description: Verify email using token.
  *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - token
- *             properties:
- *               token:
- *                 type: string
- *                 example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+ *     parameters:
+ *       - in: query
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Email verification token
+ *         example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
  *     responses:
  *       "204":
- *         description: No content
- *       "401":
- *         description: Unauthorized
+ *         description: No Content
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Email verified successfully"
+ *                 data:
+ *                   type: null
+ *                 error:
+ *                   type: null
+ *       "400":
+ *         description: Invalid input
  *         content:
  *           application/json:
  *             schema:

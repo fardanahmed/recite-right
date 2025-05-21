@@ -55,7 +55,12 @@ const saveToken = async (token, userId, expires, type, blacklisted = false) => {
 const verifyToken = async (token, type) => {
   try {
     const payload = jwt.verify(token, config.jwt.secret);
-    const tokenDoc = await Token.findOne({ token, type, user: mongoose.Types.ObjectId(payload.sub), blacklisted: false });
+    const tokenDoc = await Token.findOne({
+      token,
+      type,
+      user: new mongoose.Types.ObjectId(payload.sub),
+      blacklisted: false,
+    });
     if (!tokenDoc) {
       throw new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate');
     }
@@ -119,7 +124,7 @@ const generateResetPasswordToken = async (email) => {
  * @returns {Promise<string>}
  */
 const generateVerifyEmailToken = async (user) => {
-  const expires = moment().add(config.jwt.verifyEmailExpirationMinutes, 'minutes');
+  const expires = moment().add(config.jwt.verifyEmailExpirationDays, 'days');
   const verifyEmailToken = generateToken(user.id, expires, tokenTypes.VERIFY_EMAIL);
   await saveToken(verifyEmailToken, user.id, expires, tokenTypes.VERIFY_EMAIL);
   return verifyEmailToken;

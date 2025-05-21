@@ -3,20 +3,24 @@ const { userOne } = require('./user.fixture');
 
 const quizQuestions = [
   {
-    question: 'What is the capital of France?',
-    options: ['London', 'Berlin', 'Paris', 'Madrid'],
-    correctAnswer: 'Paris',
-    createdBy: userOne._id,
-    description: 'Test quiz description',
     title: 'Test quiz title',
-  },
-  {
-    question: 'What is the largest planet in our solar system?',
-    options: ['Earth', 'Mars', 'Jupiter', 'Saturn'],
-    correctAnswer: 'Jupiter',
-    createdBy: userOne._id,
     description: 'Test quiz description',
-    title: 'Test quiz title',
+    questions: [
+      {
+        question: 'What is the capital of France?',
+        options: ['London', 'Berlin', 'Paris', 'Madrid'],
+        correctAnswer: 2, // Index of 'Paris' in options array
+      },
+      {
+        question: 'What is the largest planet in our solar system?',
+        options: ['Earth', 'Mars', 'Jupiter', 'Saturn'],
+        correctAnswer: 2, // Index of 'Jupiter' in options array
+      },
+    ],
+    difficulty: 'easy',
+    timeLimit: 300,
+    createdBy: userOne._id,
+    status: 'active',
   },
 ];
 

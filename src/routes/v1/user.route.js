@@ -33,12 +33,15 @@ module.exports = router;
  *     Error:
  *       type: object
  *       properties:
- *         code:
- *           type: integer
- *           example: 400
+ *         success:
+ *           type: boolean
+ *           example: false
  *         message:
  *           type: string
  *           example: "Invalid input"
+ *         error:
+ *           type: string
+ *           example: "User not found"
  *     User:
  *       type: object
  *       properties:
@@ -114,7 +117,18 @@ module.exports = router;
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/User'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "User created successfully"
+ *                 data:
+ *                   $ref: '#/components/schemas/User'
+ *                 error:
+ *                   type: null
  *       "400":
  *         description: Invalid input
  *         content:
@@ -183,22 +197,33 @@ module.exports = router;
  *             schema:
  *               type: object
  *               properties:
- *                 results:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/User'
- *                 page:
- *                   type: integer
- *                   example: 1
- *                 limit:
- *                   type: integer
- *                   example: 10
- *                 totalPages:
- *                   type: integer
- *                   example: 1
- *                 totalResults:
- *                   type: integer
- *                   example: 1
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Users retrieved successfully"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     results:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/User'
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 10
+ *                     totalPages:
+ *                       type: integer
+ *                       example: 1
+ *                     totalResults:
+ *                       type: integer
+ *                       example: 1
+ *                 error:
+ *                   type: null
  *       "401":
  *         description: Unauthorized
  *         content:
@@ -218,7 +243,7 @@ module.exports = router;
  * /v1/users/{userId}:
  *   get:
  *     summary: Get a user
- *     description: Logged in users can fetch only their own user information. Only admins can fetch other users.
+ *     description: Logged in users can fetch their own user information. Only admins can fetch other users.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -228,14 +253,25 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: string
- *         description: User id
+ *         description: User ID
  *     responses:
  *       "200":
  *         description: OK
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/User'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "User retrieved successfully"
+ *                 data:
+ *                   $ref: '#/components/schemas/User'
+ *                 error:
+ *                   type: null
  *       "401":
  *         description: Unauthorized
  *         content:
@@ -267,7 +303,7 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: string
- *         description: User id
+ *         description: User ID
  *     requestBody:
  *       required: true
  *       content:
@@ -295,7 +331,18 @@ module.exports = router;
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/User'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "User updated successfully"
+ *                 data:
+ *                   $ref: '#/components/schemas/User'
+ *                 error:
+ *                   type: null
  *       "400":
  *         description: Invalid input
  *         content:
@@ -323,7 +370,7 @@ module.exports = router;
  *
  *   delete:
  *     summary: Delete a user
- *     description: Logged in users can delete only themselves. Only admins can delete other users.
+ *     description: Logged in users can only delete their own user. Only admins can delete other users.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
@@ -333,14 +380,25 @@ module.exports = router;
  *         required: true
  *         schema:
  *           type: string
- *         description: User id
+ *         description: User ID
  *     responses:
- *       "200":
- *         description: OK
+ *       "204":
+ *         description: No Content
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/User'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "User deleted successfully"
+ *                 data:
+ *                   type: null
+ *                 error:
+ *                   type: null
  *       "401":
  *         description: Unauthorized
  *         content:

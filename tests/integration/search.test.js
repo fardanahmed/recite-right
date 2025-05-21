@@ -30,6 +30,7 @@ describe('Search routes', () => {
             englishName: 'The Cow',
           }),
         ]),
+        error: null,
       });
       expect(res.body.data).toHaveLength(searchResults.length);
     });
@@ -46,6 +47,7 @@ describe('Search routes', () => {
             englishName: 'The Opening',
           }),
         ]),
+        error: null,
       });
     });
 
@@ -56,6 +58,7 @@ describe('Search routes', () => {
         success: true,
         message: 'No results found',
         data: [],
+        error: null,
       });
     });
 
@@ -71,6 +74,7 @@ describe('Search routes', () => {
             englishName: 'The Opening',
           }),
         ]),
+        error: null,
       });
     });
 
@@ -86,6 +90,7 @@ describe('Search routes', () => {
             englishName: 'The Cow',
           }),
         ]),
+        error: null,
       });
     });
   });

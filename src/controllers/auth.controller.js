@@ -2,6 +2,7 @@ const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const ApiResponse = require('../utils/response');
 const { authService, userService, tokenService, emailService } = require('../services');
+const ApiError = require('../utils/ApiError');
 
 const register = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
@@ -44,7 +45,11 @@ const sendVerificationEmail = catchAsync(async (req, res) => {
 });
 
 const verifyEmail = catchAsync(async (req, res) => {
-  await authService.verifyEmail(req.query.token);
+  const { token } = req.query;
+  if (!token) {
+    throw new ApiError(httpStatus.BAD_REQUEST, '"token" is required');
+  }
+  await authService.verifyEmail(token);
   return ApiResponse.success(res, null, 'Email verified successfully', httpStatus.NO_CONTENT);
 });
 
