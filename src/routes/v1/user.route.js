@@ -28,7 +28,53 @@ module.exports = router;
 
 /**
  * @swagger
- * /users:
+ * components:
+ *   schemas:
+ *     Error:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *           example: false
+ *         message:
+ *           type: string
+ *           example: "Invalid input"
+ *         error:
+ *           type: string
+ *           example: "User not found"
+ *     User:
+ *       type: object
+ *       properties:
+ *         id:
+ *           type: string
+ *           example: "507f1f77bcf86cd799439011"
+ *         name:
+ *           type: string
+ *           example: "John Doe"
+ *         email:
+ *           type: string
+ *           format: email
+ *           example: "john.doe@example.com"
+ *         role:
+ *           type: string
+ *           enum: [user, admin]
+ *           example: "user"
+ *         isEmailVerified:
+ *           type: boolean
+ *           example: false
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           example: "2024-03-20T12:00:00Z"
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           example: "2024-03-20T12:00:00Z"
+ */
+
+/**
+ * @swagger
+ * /v1/users:
  *   post:
  *     summary: Create a user
  *     description: Only admins can create other users.
@@ -49,36 +95,58 @@ module.exports = router;
  *             properties:
  *               name:
  *                 type: string
+ *                 example: "John Doe"
  *               email:
  *                 type: string
  *                 format: email
  *                 description: must be unique
+ *                 example: "john.doe@example.com"
  *               password:
  *                 type: string
  *                 format: password
  *                 minLength: 8
  *                 description: At least one number and one letter
+ *                 example: "password123"
  *               role:
- *                  type: string
- *                  enum: [user, admin]
- *             example:
- *               name: fake name
- *               email: fake@example.com
- *               password: password1
- *               role: user
+ *                 type: string
+ *                 enum: [user, admin]
+ *                 example: "user"
  *     responses:
  *       "201":
  *         description: Created
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '#/components/schemas/User'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "User created successfully"
+ *                 data:
+ *                   $ref: '#/components/schemas/User'
+ *                 error:
+ *                   type: null
  *       "400":
- *         $ref: '#/components/responses/DuplicateEmail'
+ *         description: Invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       "401":
- *         $ref: '#/components/responses/Unauthorized'
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       "403":
- *         $ref: '#/components/responses/Forbidden'
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *
  *   get:
  *     summary: Get all users
@@ -92,16 +160,19 @@ module.exports = router;
  *         schema:
  *           type: string
  *         description: User name
+ *         example: "John"
  *       - in: query
  *         name: role
  *         schema:
  *           type: string
  *         description: User role
+ *         example: "user"
  *       - in: query
  *         name: sortBy
  *         schema:
  *           type: string
  *         description: sort by query in the form of field:desc/asc (ex. name:asc)
+ *         example: "name:asc"
  *       - in: query
  *         name: limit
  *         schema:
@@ -109,6 +180,7 @@ module.exports = router;
  *           minimum: 1
  *         default: 10
  *         description: Maximum number of users
+ *         example: 10
  *       - in: query
  *         name: page
  *         schema:
@@ -116,6 +188,7 @@ module.exports = router;
  *           minimum: 1
  *           default: 1
  *         description: Page number
+ *         example: 1
  *     responses:
  *       "200":
  *         description: OK
@@ -124,57 +197,99 @@ module.exports = router;
  *             schema:
  *               type: object
  *               properties:
- *                 results:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/User'
- *                 page:
- *                   type: integer
- *                   example: 1
- *                 limit:
- *                   type: integer
- *                   example: 10
- *                 totalPages:
- *                   type: integer
- *                   example: 1
- *                 totalResults:
- *                   type: integer
- *                   example: 1
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Users retrieved successfully"
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     results:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/User'
+ *                     page:
+ *                       type: integer
+ *                       example: 1
+ *                     limit:
+ *                       type: integer
+ *                       example: 10
+ *                     totalPages:
+ *                       type: integer
+ *                       example: 1
+ *                     totalResults:
+ *                       type: integer
+ *                       example: 1
+ *                 error:
+ *                   type: null
  *       "401":
- *         $ref: '#/components/responses/Unauthorized'
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       "403":
- *         $ref: '#/components/responses/Forbidden'
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 
 /**
  * @swagger
- * /users/{id}:
+ * /v1/users/{userId}:
  *   get:
  *     summary: Get a user
- *     description: Logged in users can fetch only their own user information. Only admins can fetch other users.
+ *     description: Logged in users can fetch their own user information. Only admins can fetch other users.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: userId
  *         required: true
  *         schema:
  *           type: string
- *         description: User id
+ *         description: User ID
  *     responses:
  *       "200":
  *         description: OK
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '#/components/schemas/User'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "User retrieved successfully"
+ *                 data:
+ *                   $ref: '#/components/schemas/User'
+ *                 error:
+ *                   type: null
  *       "401":
- *         $ref: '#/components/responses/Unauthorized'
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       "403":
- *         $ref: '#/components/responses/Forbidden'
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       "404":
- *         $ref: '#/components/responses/NotFound'
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *
  *   patch:
  *     summary: Update a user
@@ -184,11 +299,11 @@ module.exports = router;
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: userId
  *         required: true
  *         schema:
  *           type: string
- *         description: User id
+ *         description: User ID
  *     requestBody:
  *       required: true
  *       content:
@@ -198,55 +313,108 @@ module.exports = router;
  *             properties:
  *               name:
  *                 type: string
+ *                 example: "John Doe"
  *               email:
  *                 type: string
  *                 format: email
  *                 description: must be unique
+ *                 example: "john.doe@example.com"
  *               password:
  *                 type: string
  *                 format: password
  *                 minLength: 8
  *                 description: At least one number and one letter
- *             example:
- *               name: fake name
- *               email: fake@example.com
- *               password: password1
+ *                 example: "password123"
  *     responses:
  *       "200":
  *         description: OK
  *         content:
  *           application/json:
  *             schema:
- *                $ref: '#/components/schemas/User'
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "User updated successfully"
+ *                 data:
+ *                   $ref: '#/components/schemas/User'
+ *                 error:
+ *                   type: null
  *       "400":
- *         $ref: '#/components/responses/DuplicateEmail'
+ *         description: Invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       "401":
- *         $ref: '#/components/responses/Unauthorized'
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       "403":
- *         $ref: '#/components/responses/Forbidden'
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       "404":
- *         $ref: '#/components/responses/NotFound'
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *
  *   delete:
  *     summary: Delete a user
- *     description: Logged in users can delete only themselves. Only admins can delete other users.
+ *     description: Logged in users can only delete their own user. Only admins can delete other users.
  *     tags: [Users]
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
- *         name: id
+ *         name: userId
  *         required: true
  *         schema:
  *           type: string
- *         description: User id
+ *         description: User ID
  *     responses:
- *       "200":
- *         description: No content
+ *       "204":
+ *         description: No Content
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "User deleted successfully"
+ *                 data:
+ *                   type: null
+ *                 error:
+ *                   type: null
  *       "401":
- *         $ref: '#/components/responses/Unauthorized'
+ *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       "403":
- *         $ref: '#/components/responses/Forbidden'
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  *       "404":
- *         $ref: '#/components/responses/NotFound'
+ *         description: Not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
