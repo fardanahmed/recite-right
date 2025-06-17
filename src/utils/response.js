@@ -19,19 +19,19 @@ class ApiResponse {
   }
 
   static notFound(res, message = 'Resource not found') {
-    return this.error(res, { message }, httpStatus.NOT_FOUND);
+    return ApiResponse.error(res, { message }, httpStatus.NOT_FOUND);
   }
 
   static badRequest(res, message = 'Bad request') {
-    return this.error(res, { message }, httpStatus.BAD_REQUEST);
+    return ApiResponse.error(res, { message }, httpStatus.BAD_REQUEST);
   }
 
   static unauthorized(res, message = 'Please authenticate') {
-    return this.error(res, { message }, httpStatus.UNAUTHORIZED);
+    return ApiResponse.error(res, { message }, httpStatus.UNAUTHORIZED);
   }
 
   static forbidden(res, message = 'Insufficient permissions') {
-    return this.error(res, { message }, httpStatus.FORBIDDEN);
+    return ApiResponse.error(res, { message }, httpStatus.FORBIDDEN);
   }
 }
 
