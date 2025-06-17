@@ -1,416 +1,156 @@
-# RESTful API Node Server CRUD
+# Recite-Right API
 
-## Installation
+Recite-Right is a RESTful web application for Quranic learning and quizzes. It extends the original boilerplate with new features implemented post-fork, focusing on Quranic search and an interactive quiz system. The app uses modern web technologies (Node.js/Express, MongoDB, etc.) and provides Swagger/OpenAPI documentation for developers.
 
-Clone the repo:
+## Key Features
 
-```bash
-git clone https://github.com/fardanahmed/recite-right.git
-cd recite-right
-```
+* **Quranic Search**: A new search API lets users look up verses from the Quran. It loads data from external JSON files (e.g. translations or verse lists) and returns matching verses or surahs based on query keywords. This feature is entirely file-based and does not require a database.
 
-Install the dependencies:
+* **Quiz System**: An interactive quiz module stores questions and answers in a MongoDB database. Users can fetch quiz questions via API endpoints and submit answers, with the backend verifying correctness. The quiz data model (e.g. collections for questions and scores) is managed through Mongoose.
 
-```bash
-npm install
-npm run prepare
-```
+* **Swagger API Docs**: All new routes (search and quiz) are documented using Swagger/OpenAPI. An interactive Swagger UI is available (typically at `/api-docs` or a similar path), allowing developers to explore and test the API endpoints directly in the browser.
 
-Set the environment variables:
+* **Original Features**: In addition to the above, the app retains the core functionality from the original boilerplate (such as basic prayer or recitation routes) but focuses on the enhancements listed above.
 
-```bash
-copy .env.example to .env
+## Technologies Used
 
-# open .env and modify the environment variables (if needed)
-```
+* **Node.js** and **Express** for the server and API routing.
+* **MongoDB** (with [Mongoose](https://mongoosejs.com/)) for the quiz data storage.
+* **JSON data files** for static Quranic content (search indices, verses, etc.).
+* **Swagger / OpenAPI** (with middleware like `swagger-ui-express`) for API documentation.
+* **NPM** or **Yarn** for package management (e.g. `express`, `mongoose`, `swagger-jsdoc`).
 
-## Table of Contents
+(Note: Docker is not used in this project setup.)
 
-- [Features](#features)
-- [Commands](#commands)
-- [Environment Variables](#environment-variables)
-- [Project Structure](#project-structure)
-- [API Documentation](#api-documentation)
-- [Error Handling](#error-handling)
-- [Validation](#validation)
-- [Authentication](#authentication)
-- [Authorization](#authorization)
-- [Logging](#logging)
-- [Custom Mongoose Plugins](#custom-mongoose-plugins)
-- [Linting](#linting)
-- [Contributing](#contributing)
+## Setup Instructions
 
-## Features
+1. **Clone the Repository**:
 
-- **NoSQL database**: [MongoDB](https://www.mongodb.com) object data modeling using [Mongoose](https://mongoosejs.com)
-- **Authentication and authorization**: using [passport](http://www.passportjs.org)
-- **Validation**: request data validation using [Joi](https://github.com/hapijs/joi)
-- **Logging**: using [winston](https://github.com/winstonjs/winston) and [morgan](https://github.com/expressjs/morgan)
-- **Testing**: unit and integration tests using [Jest](https://jestjs.io)
-- **Error handling**: centralized error handling mechanism
-- **API documentation**: with [swagger-jsdoc](https://github.com/Surnet/swagger-jsdoc) and [swagger-ui-express](https://github.com/scottie1984/swagger-ui-express)
-- **Process management**: advanced production process management using [PM2](https://pm2.keymetrics.io)
-- **Dependency management**: with [npm](https://www.npmjs.com)
-- **Environment variables**: using [dotenv](https://github.com/motdotla/dotenv) and [cross-env](https://github.com/kentcdodds/cross-env#readme)
-- **Security**: set security HTTP headers using [helmet](https://helmetjs.github.io)
-- **Santizing**: sanitize request data against xss and query injection
-- **CORS**: Cross-Origin Resource-Sharing enabled using [cors](https://github.com/expressjs/cors)
-- **Compression**: gzip compression with [compression](https://github.com/expressjs/compression)
-- **CI**: continuous integration with [Travis CI](https://travis-ci.org)
-- **Docker support**
-- **Code coverage**: using [coveralls](https://coveralls.io)
-- **Code quality**: with [Codacy](https://www.codacy.com)
-- **Git hooks**: with [husky](https://github.com/typicode/husky) and [lint-staged](https://github.com/okonet/lint-staged)
-- **Linting**: with [ESLint](https://eslint.org) and [Prettier](https://prettier.io)
-- **Editor config**: consistent editor configuration using [EditorConfig](https://editorconfig.org)
+   ```bash
+   git clone https://github.com/fardanahmed/recite-right.git
+   cd recite-right
+   ```
 
-## Commands
+2. **Install Dependencies**:
 
-Running locally:
+   ```bash
+   npm install
+   ```
 
-```bash
-npm run dev
-```
+   This installs Node packages (Express, Mongoose, Swagger tools, etc.).
 
-Running in production:
+3. **Configure Environment**:
+   Create a `.env` file in the project root with the following variables (example):
 
-```bash
-npm start
-```
+   ```
+   PORT=5000
+   MONGO_URI=mongodb://localhost:27017/reciteright
+   ```
 
-Testing:
+   Adjust `MONGO_URI` to point to your MongoDB instance. Ensure MongoDB is running and accessible.
 
-```bash
-# run all tests
-npm test
+4. **Prepare JSON Data**:
+   The Quranic search feature relies on JSON files (e.g. under `src/data/` or similar). If not already included, place the necessary Quranic verse JSON files in the designated folder.
 
-# run all tests in watch mode
-npm run test:watch
+5. **Start the Server**:
 
-# run test coverage
-npm run coverage
-```
+   ```bash
+   npm start
+   ```
 
-Docker:
+   Or, for development with live reload, `npm run dev` (if a dev script with nodemon is provided). By default, the server listens on the port specified in `.env` (e.g. `5000`).
 
-```bash
-# run docker container in development mode
-npm run docker:dev
+6. **Access the App**:
 
-# run docker container in production mode
-npm run docker:prod
+   * API base URL: `http://localhost:5000/` (or your configured host and port).
+   * **Swagger UI**: Visit `http://localhost:5000/api-docs` (or `/docs`) in your browser to view the interactive documentation for all available endpoints.
 
-# run all tests in a docker container
-npm run docker:test
-```
+## API Overview
 
-Linting:
+The following highlights the main API routes added after the fork:
 
-```bash
-# run ESLint
-npm run lint
+### Quran Search Endpoint
 
-# fix ESLint errors
-npm run lint:fix
+* **Route:** `GET /api/quran/search`
+* **Description:** Searches Quranic verses or chapters by keyword. Reads from external JSON files containing verse data.
+* **Parameters:** Query string (e.g. `?q=mercy` to search for the word "mercy").
+* **Response:** JSON list of matching verses/surahs. Example response:
 
-# run prettier
-npm run prettier
+  ```json
+  [
+    {
+      "surah": 55,
+      "ayah": 9,
+      "text": "He sent down water from the sky..."
+    },
+    {
+      "surah": 6,
+      "ayah": 99,
+      "text": "And it is He who sends down rain from the sky..."
+    }
+  ]
+  ```
+* **Usage:** Integrate this endpoint into a frontend search box to retrieve and display Quran verses by keyword.
 
-# fix prettier errors
-npm run prettier:fix
-```
+### Quiz Endpoints
 
-## Environment Variables
+* **Route:** `GET /api/quiz`
 
-The environment variables can be found and modified in the `.env` file. They come with these default values:
+  * **Description:** Retrieves a list of quiz questions or a quiz set.
+  * **Response:** An array of quiz question objects (each with `question`, `options`, etc.).
 
-```bash
-# Port number
-PORT=3000
+* **Route:** `GET /api/quiz/:id`
 
-# URL of the Mongo DB
-MONGODB_URL=mongodb://127.0.0.1:27017/node-boilerplate
+  * **Description:** Retrieves a specific quiz question (or full quiz) by ID.
+  * **Response:** A single quiz question object or quiz details.
 
-# JWT
-# JWT secret key
-JWT_SECRET=thisisasamplesecret
-# Number of minutes after which an access token expires
-JWT_ACCESS_EXPIRATION_MINUTES=30
-# Number of days after which a refresh token expires
-JWT_REFRESH_EXPIRATION_DAYS=30
+* **Route:** `POST /api/quiz`
 
-# SMTP configuration options for the email service
-# For testing, you can use a fake SMTP service like Ethereal: https://ethereal.email/create
-SMTP_HOST=email-server
-SMTP_PORT=587
-SMTP_USERNAME=email-server-username
-SMTP_PASSWORD=email-server-password
-EMAIL_FROM=support@yourapp.com
-```
+  * **Description:** Adds a new quiz question (admin use). Expects a JSON body with question text, possible answers, and correct answer.
+  * **Body Example:**
 
-## Project Structure
+    ```json
+    {
+      "question": "Which city is known as the City of London?",
+      "options": ["New York", "London", "Paris", "Berlin"],
+      "answer": 1
+    }
+    ```
+  * **Response:** Confirmation of creation (e.g. the new quiz ID).
+
+* **Route:** `POST /api/quiz/:id/answer`
+
+  * **Description:** Submit an answer to a quiz question. The request includes the selected option. The server responds with correctness.
+  * **Body Example:**
+
+    ```json
+    { "selectedOption": 2 }
+    ```
+  * **Response:**
+
+    ```json
+    { "correct": true, "message": "Correct answer!" }
+    ```
+
+*(The above routes are illustrative; actual route names and schemas may vary. Use the Swagger UI to see precise definitions and schemas.)*
+
+### Swagger Documentation
+
+All API routes, including the above, are documented with Swagger. Once the server is running, navigate to:
 
 ```
-src\
- |--config\         # Environment variables and configuration related things
- |--controllers\    # Route controllers (controller layer)
- |--docs\           # Swagger files
- |--middlewares\    # Custom express middlewares
- |--models\         # Mongoose models (data layer)
- |--routes\         # Routes
- |--services\       # Business logic (service layer)
- |--utils\          # Utility classes and functions
- |--validations\    # Request data validation schemas
- |--app.js          # Express app
- |--index.js        # App entry point
+http://localhost:5000/api-docs
 ```
 
-## API Documentation
-
-To view the list of available APIs and their specifications, run the server and go to `http://localhost:3000/v1/docs` in your browser. This documentation page is automatically generated using the [swagger](https://swagger.io/) definitions written as comments in the route files.
-
-### API Endpoints
-
-List of available routes:
-
-**Auth routes**:\
-`POST /v1/auth/register` - register\
-`POST /v1/auth/login` - login\
-`POST /v1/auth/refresh-tokens` - refresh auth tokens\
-`POST /v1/auth/forgot-password` - send reset password email\
-`POST /v1/auth/reset-password` - reset password\
-`POST /v1/auth/send-verification-email` - send verification email\
-`POST /v1/auth/verify-email` - verify email
-
-**User routes**:\
-`POST /v1/users` - create a user\
-`GET /v1/users` - get all users\
-`GET /v1/users/:userId` - get user\
-`PATCH /v1/users/:userId` - update user\
-`DELETE /v1/users/:userId` - delete user
-
-## Error Handling
-
-The app has a centralized error handling mechanism.
-
-Controllers should try to catch the errors and forward them to the error handling middleware (by calling `next(error)`). For convenience, you can also wrap the controller inside the catchAsync utility wrapper, which forwards the error.
-
-```javascript
-const catchAsync = require('../utils/catchAsync');
-
-const controller = catchAsync(async (req, res) => {
-  // this error will be forwarded to the error handling middleware
-  throw new Error('Something wrong happened');
-});
-```
-
-The error handling middleware sends an error response, which has the following format:
-
-```json
-{
-  "code": 404,
-  "message": "Not found"
-}
-```
-
-When running in development mode, the error response also contains the error stack.
-
-The app has a utility ApiError class to which you can attach a response code and a message, and then throw it from anywhere (catchAsync will catch it).
-
-For example, if you are trying to get a user from the DB who is not found, and you want to send a 404 error, the code should look something like:
-
-```javascript
-const httpStatus = require('http-status');
-const ApiError = require('../utils/ApiError');
-const User = require('../models/User');
-
-const getUser = async (userId) => {
-  const user = await User.findById(userId);
-  if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
-  }
-};
-```
-
-## Validation
-
-Request data is validated using [Joi](https://joi.dev/). Check the [documentation](https://joi.dev/api/) for more details on how to write Joi validation schemas.
-
-The validation schemas are defined in the `src/validations` directory and are used in the routes by providing them as parameters to the `validate` middleware.
-
-```javascript
-const express = require('express');
-const validate = require('../../middlewares/validate');
-const userValidation = require('../../validations/user.validation');
-const userController = require('../../controllers/user.controller');
-
-const router = express.Router();
-
-router.post('/users', validate(userValidation.createUser), userController.createUser);
-```
-
-## Authentication
-
-To require authentication for certain routes, you can use the `auth` middleware.
-
-```javascript
-const express = require('express');
-const auth = require('../../middlewares/auth');
-const userController = require('../../controllers/user.controller');
-
-const router = express.Router();
-
-router.post('/users', auth(), userController.createUser);
-```
-
-These routes require a valid JWT access token in the Authorization request header using the Bearer schema. If the request does not contain a valid access token, an Unauthorized (401) error is thrown.
-
-**Generating Access Tokens**:
-
-An access token can be generated by making a successful call to the register (`POST /v1/auth/register`) or login (`POST /v1/auth/login`) endpoints. The response of these endpoints also contains refresh tokens (explained below).
-
-An access token is valid for 30 minutes. You can modify this expiration time by changing the `JWT_ACCESS_EXPIRATION_MINUTES` environment variable in the .env file.
-
-**Refreshing Access Tokens**:
-
-After the access token expires, a new access token can be generated, by making a call to the refresh token endpoint (`POST /v1/auth/refresh-tokens`) and sending along a valid refresh token in the request body. This call returns a new access token and a new refresh token.
-
-A refresh token is valid for 30 days. You can modify this expiration time by changing the `JWT_REFRESH_EXPIRATION_DAYS` environment variable in the .env file.
-
-## Authorization
-
-The `auth` middleware can also be used to require certain rights/permissions to access a route.
-
-```javascript
-const express = require('express');
-const auth = require('../../middlewares/auth');
-const userController = require('../../controllers/user.controller');
-
-const router = express.Router();
-
-router.post('/users', auth('manageUsers'), userController.createUser);
-```
-
-In the example above, an authenticated user can access this route only if that user has the `manageUsers` permission.
-
-The permissions are role-based. You can view the permissions/rights of each role in the `src/config/roles.js` file.
-
-If the user making the request does not have the required permissions to access this route, a Forbidden (403) error is thrown.
-
-## Logging
-
-Import the logger from `src/config/logger.js`. It is using the [Winston](https://github.com/winstonjs/winston) logging library.
-
-Logging should be done according to the following severity levels (ascending order from most important to least important):
-
-```javascript
-const logger = require('<path to src>/config/logger');
-
-logger.error('message'); // level 0
-logger.warn('message'); // level 1
-logger.info('message'); // level 2
-logger.http('message'); // level 3
-logger.verbose('message'); // level 4
-logger.debug('message'); // level 5
-```
-
-In development mode, log messages of all severity levels will be printed to the console.
-
-In production mode, only `info`, `warn`, and `error` logs will be printed to the console.\
-It is up to the server (or process manager) to actually read them from the console and store them in log files.\
-This app uses pm2 in production mode, which is already configured to store the logs in log files.
-
-Note: API request information (request url, response code, timestamp, etc.) are also automatically logged (using [morgan](https://github.com/expressjs/morgan)).
-
-## Custom Mongoose Plugins
-
-The app also contains 2 custom mongoose plugins that you can attach to any mongoose model schema. You can find the plugins in `src/models/plugins`.
-
-```javascript
-const mongoose = require('mongoose');
-const { toJSON, paginate } = require('./plugins');
-
-const userSchema = mongoose.Schema(
-  {
-    /* schema definition here */
-  },
-  { timestamps: true }
-);
-
-userSchema.plugin(toJSON);
-userSchema.plugin(paginate);
-
-const User = mongoose.model('User', userSchema);
-```
-
-### toJSON
-
-The toJSON plugin applies the following changes in the toJSON transform call:
-
-- removes \_\_v, createdAt, updatedAt, and any schema path that has private: true
-- replaces \_id with id
-
-### paginate
-
-The paginate plugin adds the `paginate` static method to the mongoose schema.
-
-Adding this plugin to the `User` model schema will allow you to do the following:
-
-```javascript
-const queryUsers = async (filter, options) => {
-  const users = await User.paginate(filter, options);
-  return users;
-};
-```
-
-The `filter` param is a regular mongo filter.
-
-The `options` param can have the following (optional) fields:
-
-```javascript
-const options = {
-  sortBy: 'name:desc', // sort order
-  limit: 5, // maximum results per page
-  page: 2, // page number
-};
-```
-
-The plugin also supports sorting by multiple criteria (separated by a comma): `sortBy: name:desc,role:asc`
-
-The `paginate` method returns a Promise, which fulfills with an object having the following properties:
-
-```json
-{
-  "results": [],
-  "page": 2,
-  "limit": 5,
-  "totalPages": 10,
-  "totalResults": 48
-}
-```
-
-## Linting
-
-Linting is done using [ESLint](https://eslint.org/) and [Prettier](https://prettier.io).
-
-In this app, ESLint is configured to follow the [Airbnb JavaScript style guide](https://github.com/airbnb/javascript/tree/master/packages/eslint-config-airbnb-base) with some modifications. It also extends [eslint-config-prettier](https://github.com/prettier/eslint-config-prettier) to turn off all rules that are unnecessary or might conflict with Prettier.
-
-To modify the ESLint configuration, update the `.eslintrc.json` file. To modify the Prettier configuration, update the `.prettierrc.json` file.
-
-To prevent a certain file or directory from being linted, add it to `.eslintignore` and `.prettierignore`.
-
-To maintain a consistent coding style across different IDEs, the project contains `.editorconfig`
+There you will find the full API documentation, request parameters, and ability to test endpoints in the browser. This interactive UI is auto-generated from JSDoc/OpenAPI annotations in the code (see `swagger.js` or similar configuration files).
 
 ## Contributing
 
-Contributions are more than welcome! Please check out the [contributing guide](CONTRIBUTING.md).
+Developers and contributors can use the README and Swagger docs to understand and extend the application. Follow these steps to contribute:
 
-## Inspirations
+* Fork the repository and create a new feature branch.
+* Ensure code adheres to existing style and adds relevant tests or documentation.
+* Update Swagger/JSDoc comments when adding new endpoints.
+* Open a pull request with a clear description of your changes.
 
-- [danielfsousa/express-rest-es2017-boilerplate](https://github.com/danielfsousa/express-rest-es2017-boilerplate)
-- [madhums/node-express-mongoose](https://github.com/madhums/node-express-mongoose)
-- [kunalkapadia/express-mongoose-es6-rest-api](https://github.com/kunalkapadia/express-mongoose-es6-rest-api)
-
-## License
-
-[MIT](LICENSE)
+For any setup issues, ensure that your `.env` variables are correct and that MongoDB is running. With the above instructions, you should be able to run, test, and extend the Recite-Right app smoothly. Enjoy exploring the Quranic search and quiz features!
