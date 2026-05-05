@@ -18,6 +18,23 @@ Built on the [node-express-boilerplate](https://github.com/hagopj13/node-express
 | CI | Travis CI |
 | Containerization | Docker + Docker Compose |
 
+## 🏗️ System Architecture
+
+```mermaid
+graph TD
+    Client[Client Apps] -->|HTTP/REST| Express[Express.js API]
+    
+    subgraph Backend [Node.js Backend]
+        Express --> Routes[API Routes]
+        Routes --> Middlewares[Auth & Validation]
+        Middlewares --> Controllers[Controllers]
+        Controllers --> Services[Business Logic]
+        Services --> Models[Mongoose Models]
+    end
+    
+    Models -->|Mongoose ODM| MongoDB[(MongoDB Cluster)]
+```
+
 ## Features
 
 - **JWT Authentication** — Access and refresh token flow with secure cookie handling
